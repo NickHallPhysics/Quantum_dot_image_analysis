@@ -67,6 +67,12 @@ bg_365_otsu = bg_365_corrected > bg_365_otsu_thresh
 bg_280_masked = bg_280_corrected * bg_280_otsu
 bg_365_masked = bg_365_corrected * bg_280_otsu
 
+plt.figure(0)
+plt.imshow(bg_280_masked, cmap='gray')
+plt.figure(1)
+plt.imshow(bg_365_masked, cmap='gray')
+plt.show()
+
 # Analyse background corrected signal distributions at 280nm and 365nm excitation
 bg_280_signal = bg_280_corrected[bg_280_otsu] - mean_auto_280
 bg_365_signal = bg_365_corrected[bg_280_otsu] - mean_auto_365
@@ -163,39 +169,39 @@ if save_figures:
     bg_280_triangle_im = Image.fromarray(auto_280_triangle)
     bg_365_triangle_im = Image.fromarray(auto_365_triangle)
     if timestamps:
-        bg_280_corrected_im.save("280_bg_corrected_%i%i%i_%i%i.tif"
+        bg_280_corrected_im.save("output_figures\\280_bg_corrected_%i%i%i_%i%i.tif"
                                  % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                     time.gmtime()[4]))
-        bg_365_corrected_im.save("365_bg_corrected_%i%i%i_%i%i.tif"
+        bg_365_corrected_im.save("output_figures\\365_bg_corrected_%i%i%i_%i%i.tif"
                                  % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                     time.gmtime()[4]))
-        bg_280_otsu_im.save("280_otsu_mask_%i%i%i_%i%i.tif"
+        bg_280_otsu_im.save("output_figures\\280_otsu_mask_%i%i%i_%i%i.tif"
                             % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                time.gmtime()[4]))
-        bg_365_otsu_im.save("365_otsu_mask_%i%i%i_%i%i.tif"
+        bg_365_otsu_im.save("output_figures\\365_otsu_mask_%i%i%i_%i%i.tif"
                             % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                time.gmtime()[4]))
-        bg_280_masked_im.save("280_bg_corrected_w_otsu_mask_%i%i%i_%i%i.tif"
+        bg_280_masked_im.save("output_figures\\280_bg_corrected_w_otsu_mask_%i%i%i_%i%i.tif"
                               % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                  time.gmtime()[4]))
-        bg_365_masked_im.save("365_bg_corrected_w_otsu_mask_%i%i%i_%i%i.tif"
+        bg_365_masked_im.save("output_figures\\365_bg_corrected_w_otsu_mask_%i%i%i_%i%i.tif"
                               % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                  time.gmtime()[4]))
-        bg_280_triangle_im.save("280_auto_triangle_mask_%i%i%i_%i%i.tif"
+        bg_280_triangle_im.save("output_figures\\280_auto_triangle_mask_%i%i%i_%i%i.tif"
                                 % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                    time.gmtime()[4]))
-        bg_365_triangle_im.save("365_auto_triangle_mask_%i%i%i_%i%i.tif"
+        bg_365_triangle_im.save("output_figures\\365_auto_triangle_mask_%i%i%i_%i%i.tif"
                                 % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                                    time.gmtime()[4]))
     else:
-        bg_280_corrected_im.save("280_bg_corrected.tif")
-        bg_365_corrected_im.save("365_bg_corrected.tif")
-        bg_280_otsu_im.save("280_otsu_mask.tif")
-        bg_365_otsu_im.save("365_otsu_mask.tif")
-        bg_280_masked_im.save("280_bg_corrected_w_otsu_mask.tif")
-        bg_365_masked_im.save("365_bg_corrected_w_otsu_mask.tif")
-        bg_280_triangle_im.save("280_auto_triangle_mask.tif")
-        bg_365_triangle_im.save("365_auto_triangle_mask.tif")
+        bg_280_corrected_im.save("output_figures\\280_bg_corrected.tif")
+        bg_365_corrected_im.save("output_figures\\365_bg_corrected.tif")
+        bg_280_otsu_im.save("output_figures\\280_otsu_mask.tif")
+        bg_365_otsu_im.save("output_figures\\365_otsu_mask.tif")
+        bg_280_masked_im.save("output_figures\\280_bg_corrected_w_otsu_mask.tif")
+        bg_365_masked_im.save("output_figures\\365_bg_corrected_w_otsu_mask.tif")
+        bg_280_triangle_im.save("output_figures\\280_auto_triangle_mask.tif")
+        bg_365_triangle_im.save("output_figures\\365_auto_triangle_mask.tif")
 
 # Generate the desired data plots and save them with or without timestamps according to the flags specified at the top
 # of this file.
@@ -204,11 +210,11 @@ plt.hist(auto_280_signal, bins=100, label="280nm autofluorescence signal")
 plt.hist(auto_365_signal, bins=100, label="365nm autofluorescence signal")
 if save_figures:
     if timestamps:
-        plt.savefig("autofluorescence_signal_distributions_%i%i%i_%i%i.tif"
+        plt.savefig("output_figures\\autofluorescence_signal_distributions_%i%i%i_%i%i.tif"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                        time.gmtime()[4]))
     else:
-        plt.savefig("autofluorescence_signal_distributions.tif")
+        plt.savefig("output_figures\\autofluorescence_signal_distributions.tif")
 
 plt.figure(1)
 plt.hist(bg_280_signal, bins=100, alpha=0.8, label="280nm signal")
@@ -218,11 +224,11 @@ plt.title("Histograms of the signal values")
 plt.legend()
 if save_figures:
     if timestamps:
-        plt.savefig("Fluorescent_signal_histograms_%i%i%i_%i%i.png"
+        plt.savefig("output_figures\\Fluorescent_signal_histograms_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3], time.gmtime()[4]),
                     bbox_inches='tight')
     else:
-        plt.savefig("Fluorescent_signal_histograms.png", bbox_inches='tight')
+        plt.savefig("output_figures\\Fluorescent_signal_histograms.png", bbox_inches='tight')
 
 plt.figure(2)
 plt.plot(x_280, y_280, label="280nm, mean = %.3f" % bg_280_signal_mean)
@@ -231,11 +237,11 @@ plt.title("Distributions of fluorescent signal")
 plt.legend()
 if save_figures:
     if timestamps:
-        plt.savefig("Fluorescent_signal_distributions_%i%i%i_%i%i.png"
+        plt.savefig("output_figures\\Fluorescent_signal_distributions_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3], time.gmtime()[4]),
                     bbox_inches='tight')
     else:
-        plt.savefig("Fluorescent_signal_distributions.png", bbox_inches='tight')
+        plt.savefig("output_figures\\Fluorescent_signal_distributions.png", bbox_inches='tight')
 
 plt.figure(3)
 plt.hist(bg_signal_ratio, bins=1000, label="280nm:365nm ratio")
@@ -245,11 +251,11 @@ plt.title("Histograms of the ratio of signal values")
 plt.legend()
 if save_figures:
     if timestamps:
-        plt.savefig("Fluorescent_signal_ratio_histogram_%i%i%i_%i%i.png"
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_histogram_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3], time.gmtime()[4]),
                     bbox_inches='tight')
     else:
-        plt.savefig("Fluorescent_signal_ratio_histogram.png", bbox_inches='tight')
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_histogram.png", bbox_inches='tight')
 
 plt.figure(4)
 plt.plot(x, y, label="mean = %.3f, stddev = %.3f" % (bg_signal_ratio_mean, bg_signal_ratio_std_dev))
@@ -257,11 +263,11 @@ plt.title("Distribution of 280nm:365nm signal")
 plt.legend()
 if save_figures:
     if timestamps:
-        plt.savefig("Fluorescent_signal_ratio_%i%i%i_%i%i.png"
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3], time.gmtime()[4]),
                     bbox_inches='tight')
     else:
-        plt.savefig("Fluorescent_signal_ratio.png", bbox_inches='tight')
+        plt.savefig("output_figures\\Fluorescent_signal_ratio.png", bbox_inches='tight')
 
 plt.figure(5)
 plt.hist(bg_signal_ratio_no_out, bins=1000, label="280nm:365nm ratio")
@@ -271,11 +277,11 @@ plt.title("Histograms of the ratio of signal values")
 plt.legend()
 if save_figures:
     if timestamps:
-        plt.savefig("Fluorescent_signal_ratio_histogram_no_out_%i%i%i_%i%i.png"
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_histogram_no_out_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3], time.gmtime()[4]),
                     bbox_inches='tight')
     else:
-        plt.savefig("Fluorescent_signal_ratio_histogram_no_out.png", bbox_inches='tight')
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_histogram_no_out.png", bbox_inches='tight')
 
 plt.figure(6)
 plt.plot(x_out, y_out, label="mean = %.3f, stddev = %.3f" % (bg_signal_ratio_no_out_mean, bg_signal_ratio_no_out_std_dev))
@@ -283,10 +289,10 @@ plt.title("Distribution of 280nm:365nm signal")
 plt.legend()
 if save_figures:
     if timestamps:
-        plt.savefig("Fluorescent_signal_ratio_no_out_%i%i%i_%i%i.png"
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_no_out_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3], time.gmtime()[4]),
                     bbox_inches='tight')
     else:
-        plt.savefig("Fluorescent_signal_ratio_no_out.png", bbox_inches='tight')
+        plt.savefig("output_figures\\Fluorescent_signal_ratio_no_out.png", bbox_inches='tight')
 
 plt.show()

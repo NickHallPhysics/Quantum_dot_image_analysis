@@ -1,0 +1,9 @@
+## Some people use MacOS
+.DS_Store
+
+## Some text editors often create these
+~.*
+*~
+
+## Ignore the output figures
+output_figures/
