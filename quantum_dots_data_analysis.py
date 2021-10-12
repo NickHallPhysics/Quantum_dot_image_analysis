@@ -118,6 +118,12 @@ bg_280_signal_p2 = bg_280_corrected_p2[bg_280_otsu_p2] - mean_auto_280_p2
 bg_365_signal_p1 = bg_365_corrected_p1[bg_280_otsu_p1] - mean_auto_365_p1
 bg_365_signal_p2 = bg_365_corrected_p2[bg_280_otsu_p2] - mean_auto_365_p2
 
+# Normalise the signal values
+bg_280_signal_p1 = bg_280_signal_p1/np.mean(bg_365_signal_p1)
+bg_365_signal_p1 = bg_365_signal_p1/np.mean(bg_365_signal_p1)
+bg_280_signal_p2 = bg_280_signal_p2/np.mean(bg_365_signal_p2)
+bg_365_signal_p2 = bg_365_signal_p2/np.mean(bg_365_signal_p2)
+
 # Assuming the 280nm and 365nm signals are normally distributed, acquire the relevant parameters to reconstruct the
 # intensity distributions
 bg_280_signal_mean_p1 = np.mean(bg_280_signal_p1)
@@ -175,6 +181,24 @@ bg_signal_ratio_p2 = bg_280_signal_no_zero_p2/bg_365_signal_no_zero_p2
 
 print("Minimum 280nm:365nm signal ratio of the 1st image pair = %.5f" % np.min(bg_signal_ratio_p1))
 print("Minimum 280nm:365nm signal ratio of the 2st image pair = %.5f" % np.min(bg_signal_ratio_p2))
+
+bg_signal_ratio_above_1_p1 = len(np.where(bg_signal_ratio_p1 > 1)[0])
+bg_signal_ratio_above_1_p2 = len(np.where(bg_signal_ratio_p2 > 1)[0])
+
+bg_signal_ratio_above_1_p1_perc = (bg_signal_ratio_above_1_p1/len(bg_signal_ratio_p1))*100
+bg_signal_ratio_above_1_p2_perc = (bg_signal_ratio_above_1_p2/len(bg_signal_ratio_p2))*100
+
+print("280nm:365nm signal ratio of the 1st image pair above 1 = %.5f%%" % bg_signal_ratio_above_1_p1_perc)
+print("280nm:365nm signal ratio of the 2nd image pair above 1 = %.5f%%" % bg_signal_ratio_above_1_p2_perc)
+
+bg_signal_ratio_above_2_p1 = len(np.where(bg_signal_ratio_p1 > 2)[0])
+bg_signal_ratio_above_2_p2 = len(np.where(bg_signal_ratio_p2 > 2)[0])
+
+bg_signal_ratio_above_2_p1_perc = (bg_signal_ratio_above_2_p1/len(bg_signal_ratio_p1))*100
+bg_signal_ratio_above_2_p2_perc = (bg_signal_ratio_above_2_p2/len(bg_signal_ratio_p2))*100
+
+print("280nm:365nm signal ratio of the 1st image pair above 2 = %.5f%%" % bg_signal_ratio_above_2_p1_perc)
+print("280nm:365nm signal ratio of the 2nd image pair above 2 = %.5f%%" % bg_signal_ratio_above_2_p2_perc)
 
 # Assuming the 280nm:365nm signal ratio is normally distributed, acquire the relevant parameters to reconstruct the
 # intensity ratio distribution
@@ -504,13 +528,13 @@ std_devs_p1 = [np.sqrt(np.var(bg_365_signal_p1)), np.sqrt(np.var(bg_280_signal_p
 fig1, ax1 = plt.subplots()
 ax1.bar("365 nm excitation", means_p1[0], yerr=std_devs_p1[0], label = "365 nm mean = %.3f" %bg_365_signal_mean_p1)
 ax1.bar("280 nm excitation", means_p1[1], yerr=std_devs_p1[1], label = "280 nm mean = %.3f" %bg_280_signal_mean_p1)
-ax1.annotate(text_p1, xy=(0.45, (1.43*means_p1[1])+std_devs_p1[1]), zorder=10)
+ax1.annotate(text_p1, xy=(0.45, (1.365*means_p1[1])+std_devs_p1[1]), zorder=10)
 ax1.annotate('', xy=(0, means_p1[1]+(0.80*std_devs_p1[1])),
              xytext=(1, means_p1[1]+(0.80*std_devs_p1[1])), arrowprops=props)
 ax1.legend(loc="upper left")
-ax1.set_ylim([0, 450])
+ax1.set_ylim([0, np.max(means_p1)+(2*np.max(std_devs_p1))])
 ax1.set_xticklabels(x_label)
-ax1.set_ylabel("Intensity")
+ax1.set_ylabel("Scaled Intensity")
 
 data_p2 = p_value_signal_p2
 text_p2 = ''
@@ -525,25 +549,25 @@ std_devs_p2 = [np.sqrt(np.var(bg_365_signal_p2)), np.sqrt(np.var(bg_280_signal_p
 fig2, ax2 = plt.subplots()
 ax2.bar("365 nm excitation", means_p2[0], yerr=std_devs_p2[0], label = "365 nm mean = %.3f" %bg_365_signal_mean_p2)
 ax2.bar("280 nm excitation", means_p2[1], yerr=std_devs_p2[1], label = "280 nm mean = %.3f" %bg_280_signal_mean_p2)
-ax2.annotate(text_p2, xy=(0.45, (1.55*means_p2[1])+std_devs_p2[1]), zorder=10)
-ax2.annotate('', xy=(0, means_p2[1]+(0.75*std_devs_p2[1])),
-             xytext=(1, means_p2[1]+(0.75*std_devs_p2[1])), arrowprops=props)
+ax2.annotate(text_p2, xy=(0.45, (1.35*means_p2[1])+std_devs_p2[1]), zorder=10)
+ax2.annotate('', xy=(0, means_p2[1]+(0.8*std_devs_p2[1])),
+             xytext=(1, means_p2[1]+(0.8*std_devs_p2[1])), arrowprops=props)
 ax2.legend(loc="upper left")
-ax2.set_ylim([0, 450])
+ax2.set_ylim([0, np.max(means_p2)+(2*np.max(std_devs_p2))])
 ax2.set_xticklabels(x_label)
-ax2.set_ylabel("Intensity")
+ax2.set_ylabel("Scaled Intensity")
 
 if save_figures:
     if timestamps:
-        fig1.savefig("output_figures\\mean_intensity_comparison_image_pair1_%i%i%i_%i%i.tif"
+        fig1.savefig("output_figures\\mean_intensity_comparison_image_pair1_%i%i%i_%i%i.png"
                     % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                        time.gmtime()[4]))
-        fig2.savefig("output_figures\\mean_normalised_intensity_comparison_image_pair2_%i%i%i_%i%i.tif"
+        fig2.savefig("output_figures\\mean_normalised_intensity_comparison_image_pair2_%i%i%i_%i%i.png"
                      % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
                         time.gmtime()[4]))
     else:
-        fig1.savefig("output_figures\\mean_intensity_comparison_image_pair1.tif")
-        fig2.savefig("output_figures\\mean_intensity_comparison_image_pair2.tif")
+        fig1.savefig("output_figures\\mean_intensity_comparison_image_pair1.png")
+        fig2.savefig("output_figures\\mean_intensity_comparison_image_pair2.png")
 
 plt.figure(3)
 # plt.plot(time_points_photobleaching, mean_280, color="orange", label="280 nm", linewidth=3, alpha=0.5)
@@ -593,6 +617,14 @@ plt.bar("365 nm Irradiation", tau_365_mins, label="50% cell death at 165 minutes
 plt.bar("280 nm Irradiation", tau_280_mins, label="50% cell death at 43 minutes", color="darkorange")
 plt.legend()
 plt.ylabel("Time at 50% Cell Death (Minutes)")
+
+if save_figures:
+    if timestamps:
+        plt.savefig("output_figures\\cell_viability_half_dead_%i%i%i_%i%i.png"
+                    % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
+                       time.gmtime()[4]))
+    else:
+        plt.savefig("output_figures\\cell_viability_half_dead.png")
 
 plt.show()
 
