@@ -8,7 +8,14 @@ import pandas as pd
 from sklearn import preprocessing
 import math
 import scipy.optimize
-from scipy import interpolate
+from scipy import interpolate, integrate
+
+def signal_distribution(x,mu,sigma):
+    return (1 / (sigma * np.sqrt(2 * np.pi))) * np.exp((-(x - mu) ** 2) / (2 * sigma ** 2))
+
+def signal_distribution_scaled(x,mu,sigma):
+    scale_factor = integrate.quad(signal_distribution, a=0, b=np.inf, args=(bg_signal_ratio_no_out_mean_p1,bg_signal_ratio_no_out_std_dev_p1))[0]
+    return ((1 / (sigma * np.sqrt(2 * np.pi))) * np.exp((-(x - mu) ** 2) / (2 * sigma ** 2)))/scale_factor
 
 save_figures = True
 timestamps = False
@@ -262,8 +269,29 @@ x_out_p1 = np.linspace(np.max([np.min(bg_signal_ratio_p1), (bg_signal_ratio_no_o
 x_out_p2 = np.linspace(np.max([np.min(bg_signal_ratio_p2), (bg_signal_ratio_no_out_mean_p2-(5*bg_signal_ratio_no_out_std_dev_p2))]),
                     (bg_signal_ratio_no_out_mean_p2+(5*bg_signal_ratio_no_out_std_dev_p2)), 1000)
 
-y_out_p1 = np.exp((-(x_out_p1 - bg_signal_ratio_no_out_mean_p1) ** 2) / (2 * bg_signal_ratio_no_out_std_dev_p1 ** 2))
-y_out_p2 = np.exp((-(x_out_p2 - bg_signal_ratio_no_out_mean_p2) ** 2) / (2 * bg_signal_ratio_no_out_std_dev_p2 ** 2))
+y_out_p1 = (1/(bg_signal_ratio_no_out_std_dev_p1 * np.sqrt(2*np.pi))) * np.exp((-(x_out_p1 - bg_signal_ratio_no_out_mean_p1) ** 2) / (2 * bg_signal_ratio_no_out_std_dev_p1 ** 2))
+y_out_p2 = (1/(bg_signal_ratio_no_out_std_dev_p2 * np.sqrt(2*np.pi))) * np.exp((-(x_out_p2 - bg_signal_ratio_no_out_mean_p2) ** 2) / (2 * bg_signal_ratio_no_out_std_dev_p2 ** 2))
+
+prob_above_0_p1 = integrate.quad(signal_distribution, a=0, b=np.inf, args=(bg_signal_ratio_no_out_mean_p1, bg_signal_ratio_no_out_std_dev_p1))[0]
+prob_above_0_p2 = integrate.quad(signal_distribution, a=0, b=np.inf, args=(bg_signal_ratio_no_out_mean_p2, bg_signal_ratio_no_out_std_dev_p2))[0]
+prob_above_1_p1 = integrate.quad(signal_distribution, a=1, b=np.inf, args=(bg_signal_ratio_no_out_mean_p1, bg_signal_ratio_no_out_std_dev_p1))[0]
+prob_above_1_p2 = integrate.quad(signal_distribution, a=1, b=np.inf, args=(bg_signal_ratio_no_out_mean_p2, bg_signal_ratio_no_out_std_dev_p2))[0]
+
+print("Cummulative probabilty of the 280:365nm ratio being above 0 for the 1st image pair = %.5f" %prob_above_0_p1)
+print("Cummulative probabilty of the 280:365nm ratio being above 0 for the 2nd image pair = %.5f" %prob_above_0_p2)
+print("Cummulative probabilty of the 280:365nm ratio being above 1 for the 1st image pair = %.5f" %prob_above_1_p1)
+print("Cummulative probabilty of the 280:365nm ratio being above 1 for the 2nd image pair = %.5f" %prob_above_1_p2)
+
+scale_factor_p1 = integrate.quad(signal_distribution, a=0, b=np.inf, args=(bg_signal_ratio_no_out_mean_p1, bg_signal_ratio_no_out_std_dev_p1))[0]
+scale_factor_p2 = integrate.quad(signal_distribution, a=0, b=np.inf, args=(bg_signal_ratio_no_out_mean_p2, bg_signal_ratio_no_out_std_dev_p2))[0]
+
+y_out_p1_scaled = y_out_p1/scale_factor_p1
+y_out_p2_scaled = y_out_p2/scale_factor_p2
+
+print("Cummulative probabilty of the 280:365nm ratio being above 1 for the 1st image pair, scaled to probabilty above 0 = %.5f"
+      % (prob_above_1_p1 / prob_above_0_p1))
+print("Cummulative probabilty of the 280:365nm ratio being above 1 for the 2nd image pair, scaled to probabilty above 0 = %.5f"
+      % (prob_above_1_p2 / prob_above_0_p2))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This section is an analysis of the photobleaching of the quantum dots at both 280nm and 365nm excitation wavelengths
@@ -528,11 +556,11 @@ std_devs_p1 = [np.sqrt(np.var(bg_365_signal_p1)), np.sqrt(np.var(bg_280_signal_p
 fig1, ax1 = plt.subplots()
 ax1.bar("365 nm excitation", means_p1[0], yerr=std_devs_p1[0], label = "365 nm mean = %.3f" %bg_365_signal_mean_p1)
 ax1.bar("280 nm excitation", means_p1[1], yerr=std_devs_p1[1], label = "280 nm mean = %.3f" %bg_280_signal_mean_p1)
-ax1.annotate(text_p1, xy=(0.45, (1.365*means_p1[1])+std_devs_p1[1]), zorder=10)
+ax1.annotate(text_p1, xy=(0.45, (1.415*means_p1[1])+std_devs_p1[1]), zorder=10)
 ax1.annotate('', xy=(0, means_p1[1]+(0.80*std_devs_p1[1])),
              xytext=(1, means_p1[1]+(0.80*std_devs_p1[1])), arrowprops=props)
 ax1.legend(loc="upper left")
-ax1.set_ylim([0, np.max(means_p1)+(2*np.max(std_devs_p1))])
+ax1.set_ylim([0, np.max(means_p1)+(2.5*np.max(std_devs_p1))])
 ax1.set_xticklabels(x_label)
 ax1.set_ylabel("Scaled Intensity")
 
@@ -549,11 +577,11 @@ std_devs_p2 = [np.sqrt(np.var(bg_365_signal_p2)), np.sqrt(np.var(bg_280_signal_p
 fig2, ax2 = plt.subplots()
 ax2.bar("365 nm excitation", means_p2[0], yerr=std_devs_p2[0], label = "365 nm mean = %.3f" %bg_365_signal_mean_p2)
 ax2.bar("280 nm excitation", means_p2[1], yerr=std_devs_p2[1], label = "280 nm mean = %.3f" %bg_280_signal_mean_p2)
-ax2.annotate(text_p2, xy=(0.45, (1.35*means_p2[1])+std_devs_p2[1]), zorder=10)
+ax2.annotate(text_p2, xy=(0.45, (1.4*means_p2[1])+std_devs_p2[1]), zorder=10)
 ax2.annotate('', xy=(0, means_p2[1]+(0.8*std_devs_p2[1])),
              xytext=(1, means_p2[1]+(0.8*std_devs_p2[1])), arrowprops=props)
 ax2.legend(loc="upper left")
-ax2.set_ylim([0, np.max(means_p2)+(2*np.max(std_devs_p2))])
+ax2.set_ylim([0, np.max(means_p2)+(2.5*np.max(std_devs_p2))])
 ax2.set_xticklabels(x_label)
 ax2.set_ylabel("Scaled Intensity")
 
@@ -625,6 +653,61 @@ if save_figures:
                        time.gmtime()[4]))
     else:
         plt.savefig("output_figures\\cell_viability_half_dead.png")
+
+plt.figure(6)
+plt.plot(x_out_p1, y_out_p1, label="Distribution mean = %.3f" %bg_signal_ratio_no_out_mean_p1)
+plt.fill_between(x_out_p1[np.where(x_out_p1>1)], y_out_p1[np.where(x_out_p1>1)], color="red", step="pre", alpha=0.4,
+                 label="Fraction of ratios > 1 = %.3f" %(prob_above_1_p1 / prob_above_0_p1))
+plt.xlabel("280:365 nm Signal Ratio")
+plt.ylabel("Probability Density")
+# plt.yticks([],[])
+plt.legend()
+if save_figures:
+    if timestamps:
+        plt.savefig("output_figures\\280_365_ratio_distribution_image_pair1_%i%i%i_%i%i.png"
+                    % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
+                       time.gmtime()[4]))
+    else:
+        plt.savefig("output_figures\\280_365_ratio_distribution_image_pair1.png")
+
+plt.figure(7)
+plt.plot(x_out_p2, y_out_p2, label="Distribution mean = %.3f" %bg_signal_ratio_no_out_mean_p2)
+plt.fill_between(x_out_p2[np.where(x_out_p2>1)], y_out_p2[np.where(x_out_p2>1)], color="red", step="pre", alpha=0.4,
+                 label="Fraction of ratios > 1 = %.3f" %(prob_above_1_p2 / prob_above_0_p2))
+plt.xlabel("280:365 nm Signal Ratio")
+plt.ylabel("Probability Density")
+# plt.yticks([],[])
+plt.legend()
+if save_figures:
+    if timestamps:
+        plt.savefig("output_figures\\280_365_ratio_distribution_image_pair2_%i%i%i_%i%i.png"
+                    % (time.gmtime()[2], time.gmtime()[1], time.gmtime()[0], time.gmtime()[3],
+                       time.gmtime()[4]))
+    else:
+        plt.savefig("output_figures\\280_365_ratio_distribution_image_pair2.png")
+
+# Generate the desired data plots and save them with or without timestamps according to the flags specified at the top
+# of this file.
+x_label = ["QD525", "QD605"]
+x_pos = np.arange(len(x_label))
+
+data_p1 = p_value_signal_p1
+text_p1 = ''
+while data_p1 < p:
+    text_p1 += '*'
+    p /= 10.
+    if maxasterix and len(text_p1) == maxasterix:
+        break
+
+means_p3 = [bg_signal_ratio_no_out_mean_p1, bg_signal_ratio_no_out_mean_p2]
+std_devs_p3 = [bg_signal_ratio_no_out_std_dev_p1, bg_signal_ratio_no_out_std_dev_p2]
+fig3, ax3 = plt.subplots()
+ax3.bar("QD525", means_p3[0], yerr=std_devs_p3[0], label = "QD525 image pair mean = %.3f" %bg_signal_ratio_no_out_mean_p1)
+ax3.bar("QD605", means_p3[1], yerr=std_devs_p3[1], label = "QD605 image pair mean = %.3f" %bg_signal_ratio_no_out_mean_p2)
+ax3.legend(loc="upper left")
+# ax1.set_ylim([0, np.max(means_p1)+(2.5*np.max(std_devs_p1))])
+ax3.set_xticklabels(x_label)
+ax3.set_ylabel("280:365 nm Signal Ratio")
 
 plt.show()
 
